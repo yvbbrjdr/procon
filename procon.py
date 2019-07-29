@@ -1,7 +1,7 @@
 import math
 import time
 
-import hidraw
+import hid
 
 class ProCon:
     VENDOR_ID = 0x057E
@@ -40,7 +40,7 @@ class ProCon:
 
     def __init__(self):
         self.subcommand_counter = 0
-        self.dev = hidraw.device()
+        self.dev = hid.device()
         self.dev.open(ProCon.VENDOR_ID, ProCon.PRODUCT_ID)
         self.handshake()
         self.high_speed()
