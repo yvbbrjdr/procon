@@ -252,8 +252,6 @@ class ProCon:
     def enable_vibration(self, enable):
         return self.send_subcommand(ProCon.SubcommandID.ENABLE_VIBRATION, (int(enable),))
 
-con = ProCon()
-
 def print_state(buttons, l_stick, r_stick, accel, gyro, battery):
     print('\33[2JButtons:')
     for k, v in buttons.items():
@@ -269,4 +267,4 @@ def print_state(buttons, l_stick, r_stick, accel, gyro, battery):
     print('Battery: {}/9'.format(battery))
 
 if __name__ == '__main__':
-    con.start(print_state)
+    ProCon().start(print_state)
