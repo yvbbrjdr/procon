@@ -3,6 +3,9 @@ import time
 
 import hid
 
+def to_int16(uint16):
+    return -((uint16 ^ 0xFFFF) + 1) if uint16 & 0x8000 else uint16
+
 class ProCon:
     VENDOR_ID = 0x057E
     PRODUCT_ID = 0x2009
@@ -90,8 +93,10 @@ class ProCon:
             r_y = self.apply_stick_calibration(r_y, 1, 1)
             l_stick = (l_x, l_y)
             r_stick = (r_x, r_y)
-            accel = (0, 0, 0)
-            gyro = (0, 0, 0)
+            accel = (state[13] | state[14] << 8, state[15] | state[16] << 8, state[17] | state[18] << 8)
+            gyro = (state[19] | state[20] << 8, state[21] | state[22] << 8, state[23] | state[24] << 8)
+            accel = tuple(map(to_int16, accel))
+            gyro = tuple(map(to_int16, gyro))
             battery = (state[2] & 0xF0) >> 4
             callback(buttons, l_stick, r_stick, accel, gyro, battery)
             if self.rumble_expire and int(time.time() * 1000) >= self.rumble_expire:
@@ -250,13 +255,18 @@ class ProCon:
 con = ProCon()
 
 def print_state(buttons, l_stick, r_stick, accel, gyro, battery):
-    print('\33[2K ', end='')
+    print('\33[2JButtons:')
     for k, v in buttons.items():
         if v:
             print('[{}]'.format(k), end=' ')
         else:
             print(' {} '.format(k), end=' ')
-    print('{} {} {} {} {}'.format(l_stick, r_stick, accel, gyro, battery), end='\r')
+    print()
+    print('L Stick: ({:6}, {:6})'.format(l_stick[0], l_stick[1]))
+    print('R Stick: ({:6}, {:6})'.format(r_stick[0], r_stick[1]))
+    print('Accelerometer: ({:6}, {:6}, {:6})'.format(accel[0], accel[1], accel[2]))
+    print('Gyroscope: ({:6}, {:6}, {:6})'.format(gyro[0], gyro[1], gyro[2]))
+    print('Battery: {}/9'.format(battery))
 
 if __name__ == '__main__':
     con.start(print_state)
