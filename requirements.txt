@@ -1,1 +1,2 @@
 hidapi==0.7.99.post21
+python-uinput==0.11.2
