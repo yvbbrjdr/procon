@@ -43,6 +43,26 @@ class ProCon:
         SET_IMU_SENSITIVITY = 0x41
         ENABLE_VIBRATION = 0x48
 
+    class Button:
+        A = 'A'
+        B = 'B'
+        X = 'X'
+        Y = 'Y'
+        UP = 'Up'
+        DOWN = 'Down'
+        LEFT = 'Left'
+        RIGHT = 'Right'
+        MINUS = '-'
+        PLUS = '+'
+        SCREENSHOT = 'Screenshot'
+        HOME = 'Home'
+        L = 'L'
+        ZL = 'ZL'
+        R = 'R'
+        ZR = 'ZR'
+        LS = 'LS'
+        RS = 'RS'
+
     def __init__(self):
         self.subcommand_counter = 0
         self.dev = hid.device()
@@ -66,24 +86,24 @@ class ProCon:
             if state[0] != ProCon.InputReportID.CONTROLLER_STATE:
                 continue
             buttons = {
-                'A': state[3] & 0x08 > 0,
-                'B': state[3] & 0x04 > 0,
-                'X': state[3] & 0x02 > 0,
-                'Y': state[3] & 0x01 > 0,
-                'Up': state[5] & 0x02 > 0,
-                'Down': state[5] & 0x01 > 0,
-                'Left': state[5] & 0x08 > 0,
-                'Right': state[5] & 0x04 > 0,
-                '-': state[4] & 0x01 > 0,
-                '+': state[4] & 0x02 > 0,
-                'Screenshot': state[4] & 0x20 > 0,
-                'Home': state[4] & 0x10 > 0,
-                'L': state[5] & 0x40 > 0,
-                'ZL': state[5] & 0x80 > 0,
-                'R': state[3] & 0x40 > 0,
-                'ZR': state[3] & 0x80 > 0,
-                'LS': state[4] & 0x08 > 0,
-                'RS': state[4] & 0x04 > 0
+                ProCon.Button.A: state[3] & 0x08 > 0,
+                ProCon.Button.B: state[3] & 0x04 > 0,
+                ProCon.Button.X: state[3] & 0x02 > 0,
+                ProCon.Button.Y: state[3] & 0x01 > 0,
+                ProCon.Button.UP: state[5] & 0x02 > 0,
+                ProCon.Button.DOWN: state[5] & 0x01 > 0,
+                ProCon.Button.LEFT: state[5] & 0x08 > 0,
+                ProCon.Button.RIGHT: state[5] & 0x04 > 0,
+                ProCon.Button.MINUS: state[4] & 0x01 > 0,
+                ProCon.Button.PLUS: state[4] & 0x02 > 0,
+                ProCon.Button.SCREENSHOT: state[4] & 0x20 > 0,
+                ProCon.Button.HOME: state[4] & 0x10 > 0,
+                ProCon.Button.L: state[5] & 0x40 > 0,
+                ProCon.Button.ZL: state[5] & 0x80 > 0,
+                ProCon.Button.R: state[3] & 0x40 > 0,
+                ProCon.Button.ZR: state[3] & 0x80 > 0,
+                ProCon.Button.LS: state[4] & 0x08 > 0,
+                ProCon.Button.RS: state[4] & 0x04 > 0
             }
             l_x = state[6] | ((state[7] & 0xF) << 8)
             l_y = (state[7] >> 4) | (state[8] << 4)
