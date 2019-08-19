@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
 import math
+import sys
 import time
 
 import hid
 
 def to_int16(uint16):
     return -((uint16 ^ 0xFFFF) + 1) if uint16 & 0x8000 else uint16
+
+def panic(msg):
+    print(msg)
+    sys.exit(1)
 
 class ProCon:
     VENDOR_ID = 0x057E
@@ -66,7 +71,10 @@ class ProCon:
     def __init__(self):
         self.subcommand_counter = 0
         self.dev = hid.device()
-        self.dev.open(ProCon.VENDOR_ID, ProCon.PRODUCT_ID)
+        try:
+            self.dev.open(ProCon.VENDOR_ID, ProCon.PRODUCT_ID)
+        except OSError:
+            panic('Unable to open the controller. Make sure you have plugged in the controller and have sufficient permission to open it (either as root or with udev rules).')
         self.handshake()
         self.high_speed()
         self.handshake()
@@ -193,10 +201,16 @@ class ProCon:
         return int(value * -0x7FFF / self.stick_extends[stick][axis][0])
 
     def send(self, data):
-        return self.dev.write(data) == len(data)
+        try:
+            return self.dev.write(data) == len(data)
+        except OSError:
+            panic('Unable to write to the controller. Did you just unplugged the controller?')
 
     def recv(self):
-        return self.dev.read(ProCon.PACKET_SIZE)
+        try:
+            return self.dev.read(ProCon.PACKET_SIZE)
+        except OSError:
+            panic('Unable to read from the controller. Did you just unplugged the controller?')
 
     def send_command(self, id, wait_for_reply=True):
         data = (ProCon.OutputReportID.COMMAND, id)

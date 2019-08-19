@@ -49,27 +49,30 @@ def main():
         procon.ProCon.Button.RS: uinput.BTN_THUMBR
     }
     buttons_prev = {}
-    with uinput.Device(uinput_events, 'Nintendo Switch Pro Controller') as uinput_dev:
-        def send_to_uinput(buttons, l_stick, r_stick, _, __, ___):
-            nonlocal buttons_prev
-            if not buttons_prev:
+    try:
+        with uinput.Device(uinput_events, 'Nintendo Switch Pro Controller') as uinput_dev:
+            def send_to_uinput(buttons, l_stick, r_stick, _, __, ___):
+                nonlocal buttons_prev
+                if not buttons_prev:
+                    buttons_prev = buttons
+                    return
+                for k, v in buttons.items():
+                    if buttons_prev[k] != v:
+                        uinput_button = uinput_buttons_map[k]
+                        if not uinput_button:
+                            continue
+                        if v:
+                            uinput_dev.emit(uinput_button, 1)
+                        else:
+                            uinput_dev.emit(uinput_button, 0)
                 buttons_prev = buttons
-                return
-            for k, v in buttons.items():
-                if buttons_prev[k] != v:
-                    uinput_button = uinput_buttons_map[k]
-                    if not uinput_button:
-                        continue
-                    if v:
-                        uinput_dev.emit(uinput_button, 1)
-                    else:
-                        uinput_dev.emit(uinput_button, 0)
-            buttons_prev = buttons
-            uinput_dev.emit(uinput.ABS_X, l_stick[0])
-            uinput_dev.emit(uinput.ABS_Y, -l_stick[1])
-            uinput_dev.emit(uinput.ABS_RX, r_stick[0])
-            uinput_dev.emit(uinput.ABS_RY, -r_stick[1])
-        procon.ProCon().start(send_to_uinput)
+                uinput_dev.emit(uinput.ABS_X, l_stick[0])
+                uinput_dev.emit(uinput.ABS_Y, -l_stick[1])
+                uinput_dev.emit(uinput.ABS_RX, r_stick[0])
+                uinput_dev.emit(uinput.ABS_RY, -r_stick[1])
+            procon.ProCon().start(send_to_uinput)
+    except OSError:
+        procon.panic('Unable to open the uinput device. Make sure you have inserted the uinput kernel module (by `sudo modprobe uinput`) and have sufficient permission to open it (either as root or with udev rules).')
 
 if __name__ == '__main__':
     main()
