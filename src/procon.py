@@ -303,4 +303,7 @@ def print_state(buttons, l_stick, r_stick, accel, gyro, battery):
     print('Battery: {}/9'.format(battery))
 
 if __name__ == '__main__':
-    ProCon().start(print_state)
+    try:
+        ProCon().start(print_state)
+    except KeyboardInterrupt:
+        print('\rGoodbye!')
