@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
+import sys
+
 import uinput
 
 import procon
+
+def panic(msg):
+    print(msg)
+    sys.exit(1)
 
 def main():
     uinput_events = (
@@ -53,8 +59,8 @@ def main():
         print('Initializing uinput device... ', end='', flush=True)
         uinput_dev = uinput.Device(uinput_events, 'Nintendo Switch Pro Controller')
         print('done')
-    except OSError:
-        procon.panic('Unable to open the uinput device. Make sure you have inserted the uinput kernel module (by `sudo modprobe uinput`) and have sufficient permission to open it (either as root or with udev rules).')
+    except OSError as e:
+        panic('Unable to open the uinput device. Make sure you have inserted the uinput kernel module (by `sudo modprobe uinput`) and have sufficient permission to open it (either as root or with udev rules): {}'.format(e))
     def send_to_uinput(buttons, l_stick, r_stick, _, __, ___):
         nonlocal buttons_prev
         if not buttons_prev:
@@ -75,12 +81,17 @@ def main():
         uinput_dev.emit(uinput.ABS_RX, r_stick[0])
         uinput_dev.emit(uinput.ABS_RY, -r_stick[1])
     print('Initializing Nintendo Switch Pro Controller... ', end='', flush=True)
-    con = procon.ProCon()
+    try:
+        con = procon.ProCon()
+    except OSError as e:
+        panic('Unable to open the controller. Make sure you have plugged in the controller and have sufficient permission to open it (either as root or with udev rules): {}'.format(e))
     print('done\nEnjoy!')
     try:
         con.start(send_to_uinput)
     except KeyboardInterrupt:
         print('\rGoodbye!')
+    except OSError:
+        panic('IO failed. Did you just unplugged the controller?')
 
 if __name__ == '__main__':
     main()
